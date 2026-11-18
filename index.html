@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Artistry RG (2025–2028)</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Artistry RG">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --card-inner: #0f172a;
+            --border: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --blue: #1d4ed8;
+            --blue-active: #1e40af;
+            --blue-soft: rgba(29, 78, 216, 0.25);
+            --red: #f43f5e;
+            --red-dark: #be123c;
+            --green-muted: #4ade80;
+            --green-dim: #6ee7b7;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding-bottom: calc(32px + env(safe-area-inset-bottom));
+            touch-action: manipulation;
+        }
+
+        /* Sticky Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: calc(10px + env(safe-area-inset-top)) 14px 12px 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        }
+
+        .header-inner {
+            max-width: 640px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .initials-input {
+            flex: 1;
+            min-width: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-radius: 12px;
+            outline: none;
+        }
+
+        .initials-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .btn-save {
+            background: var(--blue);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-save:active {
+            background: var(--blue-active);
+            transform: scale(0.96);
+        }
+
+        .btn-reset {
+            background: #334155;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-reset:active {
+            transform: scale(0.94);
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 8px 16px;
+        }
+
+        .score-deduction {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: var(--red);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .score-final-wrap {
+            text-align: right;
+        }
+
+        .score-final-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            display: block;
+        }
+
+        .score-final {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #6ea887;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin: 0 0 8px 4px;
+        }
+
+        .group-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .row-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .row-title-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .row-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .row-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            background: #334155;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .badge.active {
+            background: var(--blue-soft);
+            color: #93c5fd;
+            border: 1px solid #3b82f6;
+        }
+
+        .badge.limit {
+            background: rgba(244, 63, 94, 0.2);
+            color: #fda4af;
+            border: 1px solid var(--red);
+        }
+
+        /* Counter Buttons (small minus, large blue plus) */
+        .counter-btns {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-minus {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #cbd5e1;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-minus:active {
+            background: #334155;
+            transform: scale(0.92);
+        }
+
+        .btn-plus {
+            width: 64px;
+            height: 54px;
+            border-radius: 14px;
+            border: none;
+            background: var(--blue);
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4);
+        }
+
+        .btn-plus.primary-lg {
+            width: 74px;
+            height: 60px;
+            font-size: 32px;
+            background: #1e40af;
+        }
+
+        .btn-plus:active {
+            transform: scale(0.93);
+            filter: brightness(1.15);
+        }
+
+        /* Segmented Radio Selectors */
+        .seg-block {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .seg-block:last-child {
+            border-bottom: none;
+        }
+
+        .seg-grid {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .seg-4 { grid-template-columns: repeat(4, 1fr); }
+        .seg-3 { grid-template-columns: repeat(3, 1fr); }
+        .seg-2 { grid-template-columns: repeat(2, 1fr); }
+
+        .seg-btn {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 4px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .seg-btn.selected {
+            background: var(--blue);
+            border-color: #60a5fa;
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(29, 78, 216, 0.45);
+        }
+
+        .seg-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Toggle Switches for Fixed Penalties */
+        .toggle-row {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .switch {
+            position: relative;
+            width: 52px;
+            height: 30px;
+            background: #334155;
+            border-radius: 999px;
+            transition: background 0.18s;
+            flex-shrink: 0;
+        }
+
+        .switch::after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.18s;
+        }
+
+        .toggle-row.active .switch {
+            background: var(--blue);
+        }
+
+        .toggle-row.active .switch::after {
+            transform: translateX(22px);
+        }
+
+        .penalty-tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fda4af;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Collapsible History */
+        .history-toggle {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .history-panel {
+            display: none;
+            margin-top: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .history-panel.open {
+            display: block;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .history-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .history-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-name {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .history-scores {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .history-ded {
+            color: var(--red);
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .history-fin {
+            color: #6ea887;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-clear-history {
+            width: 100%;
+            margin-top: 12px;
+            background: var(--red-dark);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-clear-history:active {
+            transform: scale(0.97);
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 12px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <div class="top-row">
+                <input id="initialsInput" class="initials-input" type="text" placeholder="Inicjały / nr zawodniczki..." autocomplete="off">
+                <button class="btn-save" onclick="saveAndReset()">Zapisz</button>
+                <button class="btn-reset" onclick="resetCurrent()" title="Wyzeruj bez zapisu">↺</button>
+            </div>
+            <div class="score-bar">
+                <div class="score-deduction">-<span id="totalDeduction">0.00</span></div>
+                <div class="score-final-wrap">
+                    <span class="score-final-label">Nota końcowa</span>
+                    <span class="score-final" id="finalScore">10.00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Sekcja 1: Kary kumulatywne (Północ / Góra) -->
+        <section>
+            <div class="section-title">Kary kumulatywne (-0.10 p, maks. 2.00 p)</div>
+            <div class="group-card">
+                <div class="row">
+                    <div class="row-info">
+                        <div class="row-title-line">
+                            <span class="row-title">Rytm</span>
+                            <span class="badge" id="rhythmBadge">0x (-0.00)</span>
+                        </div>
+                    </div>
+                    <div class="counter-btns">
+                        <button class="btn-minus" onclick="changeCounter('rhythm', -1)">−</button>
+                        <button class="btn-plus primary-lg" onclick="changeCounter('rhythm', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="row-info">
+                        <div class="row-title-line">
+                            <span class="row-title">Połączenia</span>
+                            <span class="badge" id="connectionsBadge">0x (-0.00)</span>
+                        </div>
+                    </div>
+                    <div class="counter-btns">
+                        <button class="btn-minus" onclick="changeCounter('connections', -1)">−</button>
+                        <button class="btn-plus primary-lg" onclick="changeCounter('connections', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja 2: Wymogi kompozycyjne -->
+        <section>
+            <div class="section-title">Wymogi kompozycyjne (-0.30 p)</div>
+            <div class="group-card">
+                <div class="row">
+                    <div class="row-info">
+                        <div class="row-title-line">
+                            <span class="row-title">Kroki taneczne (S)</span>
+                            <span class="badge" id="danceBadge">0/2</span>
+                        </div>
+                    </div>
+                    <div class="counter-btns">
+                        <button class="btn-minus" onclick="changeCounter('dance', -1)">−</button>
+                        <button class="btn-plus" onclick="changeCounter('dance', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="row-info">
+                        <div class="row-title-line">
+                            <span class="row-title">Dynamika / Efekty</span>
+                            <span class="badge" id="dynamicsBadge">0/2</span>
+                        </div>
+                    </div>
+                    <div class="counter-btns">
+                        <button class="btn-minus" onclick="changeCounter('dynamics', -1)">−</button>
+                        <button class="btn-plus" onclick="changeCounter('dynamics', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="row-info">
+                        <div class="row-title-line">
+                            <span class="row-title">3 trudności w miejscu</span>
+                            <span class="badge" id="sameSpotBadge">0x</span>
+                        </div>
+                    </div>
+                    <div class="counter-btns">
+                        <button class="btn-minus" onclick="changeCounter('sameSpot', -1)">−</button>
+                        <button class="btn-plus" onclick="changeCounter('sameSpot', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja 3: Kategorie główne -->
+        <section>
+            <div class="section-title">Kategorie główne</div>
+            <div class="group-card">
+                <div class="seg-block">
+                    <div class="row-title">Idea przewodnia i charakter</div>
+                    <div class="seg-grid seg-4" id="ideaGroup"></div>
+                </div>
+                <div class="seg-block">
+                    <div class="row-title">Wyraz ciała (Body Expression)</div>
+                    <div class="seg-grid seg-3" id="bodyGroup"></div>
+                </div>
+                <div class="seg-block">
+                    <div class="row-title">Wyraz twarzy (Facial Expression)</div>
+                    <div class="seg-grid seg-2" id="faceGroup"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcja 4: Kary stałe -->
+        <section>
+            <div class="section-title">Kary stałe</div>
+            <div class="group-card" id="fixedList"></div>
+        </section>
+
+        <!-- Sekcja 5: Zwinięta historia -->
+        <section>
+            <button class="history-toggle" onclick="toggleHistory()">
+                <span>Historia ocen (<span id="historyCount">0</span>)</span>
+                <span id="historyArrow">▼</span>
+            </button>
+            <div class="history-panel" id="historyPanel">
+                <div id="historyList"></div>
+                <button class="btn-clear-history" id="clearHistoryBtn" onclick="clearHistory()">Wyczyść historię</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'rg_artistry_history_v1';
+
+        const fixedItems = [
+            { id: 'intro', name: 'Wstęp muzyczny (+4s)', val: 0.30 },
+            { id: 'rules', name: 'Muzyka niezgodna z zasadami', val: 0.30 },
+            { id: 'floor', name: 'Niepełne wykorzystanie dywanu', val: 0.30 },
+            { id: 'pause', name: 'Przerwanie ciągłości (+4s)', val: 0.60 },
+            { id: 'end',   name: 'Brak harmonii na końcu', val: 0.30 }
+        ];
+
+        const radioConfig = {
+            idea: [0.00, 0.30, 0.60, 1.00],
+            body: [0.00, 0.30, 0.60],
+            face: [0.00, 0.30]
+        };
+
+        const limits = {
+            rhythm: 20,
+            connections: 20,
+            dance: 2,
+            dynamics: 2,
+            sameSpot: 20
+        };
+
+        let state = {
+            rhythm: 0,
+            connections: 0,
+            dance: 0,
+            dynamics: 0,
+            sameSpot: 0,
+            idea: 0,
+            body: 0,
+            face: 0,
+            fixed: {}
+        };
+
+        function init() {
+            renderRadios();
+            renderFixed();
+            updateUI();
+            renderHistory();
+        }
+
+        function renderRadios() {
+            Object.keys(radioConfig).forEach(key => {
+                const container = document.getElementById(key + 'Group');
+                container.innerHTML = radioConfig[key].map(val => {
+                    const active = state[key] === val ? 'selected' : '';
+                    const label = val === 0 ? '0.00' : '-' + val.toFixed(2);
+                    return `<button class="seg-btn ${active}" onclick="setRadio('${key}', ${val})">${label}</button>`;
+                }).join('');
+            });
+        }
+
+        function setRadio(key, val) {
+            state[key] = val;
+            renderRadios();
+            updateUI();
+        }
+
+        function renderFixed() {
+            const container = document.getElementById('fixedList');
+            container.innerHTML = fixedItems.map(item => {
+                const isOn = !!state.fixed[item.id];
+                return `
+                    <div class="row toggle-row ${isOn ? 'active' : ''}" onclick="toggleFixed('${item.id}')">
+                        <div class="row-info">
+                            <div class="row-title">${item.name}</div>
+                            <div class="penalty-tag">-${item.val.toFixed(2)} p</div>
+                        </div>
+                        <div class="switch"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFixed(id) {
+            state.fixed[id] = !state.fixed[id];
+            renderFixed();
+            updateUI();
+        }
+
+        function changeCounter(key, delta) {
+            const next = state[key] + delta;
+            if (next >= 0 && next <= limits[key]) {
+                state[key] = next;
+                updateUI();
+            }
+        }
+
+        function getTotals() {
+            let ded = 0;
+            ded += state.rhythm * 0.10;
+            ded += state.connections * 0.10;
+            ded += state.dance * 0.30;
+            ded += state.dynamics * 0.30;
+            ded += state.sameSpot * 0.30;
+            ded += state.idea + state.body + state.face;
+            fixedItems.forEach(item => {
+                if (state.fixed[item.id]) ded += item.val;
+            });
+            ded = Math.min(10.00, Math.round(ded * 100) / 100);
+            const finalScore = Math.max(0.00, Math.round((10.00 - ded) * 100) / 100);
+            return { ded, finalScore };
+        }
+
+        function updateBadge(id, text, count, max) {
+            const el = document.getElementById(id);
+            el.textContent = text;
+            el.className = 'badge';
+            if (count >= max) el.classList.add('limit');
+            else if (count > 0) el.classList.add('active');
+        }
+
+        function updateUI() {
+            updateBadge('rhythmBadge', `${state.rhythm}x (-${(state.rhythm * 0.10).toFixed(2)})`, state.rhythm, limits.rhythm);
+            updateBadge('connectionsBadge', `${state.connections}x (-${(state.connections * 0.10).toFixed(2)})`, state.connections, limits.connections);
+            updateBadge('danceBadge', `${state.dance}/2`, state.dance, limits.dance);
+            updateBadge('dynamicsBadge', `${state.dynamics}/2`, state.dynamics, limits.dynamics);
+            updateBadge('sameSpotBadge', `${state.sameSpot}x`, state.sameSpot, limits.sameSpot);
+
+            const { ded, finalScore } = getTotals();
+            document.getElementById('totalDeduction').textContent = ded.toFixed(2);
+            document.getElementById('finalScore').textContent = finalScore.toFixed(2);
+        }
+
+        function resetCurrent() {
+            state = {
+                rhythm: 0, connections: 0, dance: 0, dynamics: 0, sameSpot: 0,
+                idea: 0, body: 0, face: 0, fixed: {}
+            };
+            document.getElementById('initialsInput').value = '';
+            renderRadios();
+            renderFixed();
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveAndReset() {
+            const { ded, finalScore } = getTotals();
+            const rawName = document.getElementById('initialsInput').value.trim();
+            const name = rawName || 'Zawodniczka';
+            const now = new Date();
+            const time = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+
+            const history = loadHistory();
+            history.unshift({ name, time, ded: ded.toFixed(2), score: finalScore.toFixed(2) });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+
+            renderHistory();
+            resetCurrent();
+        }
+
+        function renderHistory() {
+            const history = loadHistory();
+            document.getElementById('historyCount').textContent = history.length;
+            const list = document.getElementById('historyList');
+            const clearBtn = document.getElementById('clearHistoryBtn');
+
+            if (history.length === 0) {
+                list.innerHTML = '<div class="empty-msg">Brak zapisanych ocen.</div>';
+                clearBtn.style.display = 'none';
+                return;
+            }
+
+            clearBtn.style.display = 'block';
+            list.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-meta">
+                        <span class="history-name">${escapeHtml(item.name)}</span>
+                        <span class="history-time">${item.time}</span>
+                    </div>
+                    <div class="history-scores">
+                        <div class="history-ded">-${item.ded}</div>
+                        <div class="history-fin">Nota: ${item.score}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+        }
+
+        function toggleHistory() {
+            const panel = document.getElementById('historyPanel');
+            const arrow = document.getElementById('historyArrow');
+            const isOpen = panel.classList.toggle('open');
+            arrow.textContent = isOpen ? '▲' : '▼';
+        }
+
+        function clearHistory() {
+            localStorage.removeItem(STORAGE_KEY);
+            renderHistory();
+            const panel = document.getElementById('historyPanel');
+            panel.classList.remove('open');
+            document.getElementById('historyArrow').textContent = '▼';
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
